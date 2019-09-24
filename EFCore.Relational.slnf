@@ -27,7 +27,8 @@
       "test\\EFCore.SqlServer.Tests\\EFCore.SqlServer.Tests.csproj",
       "test\\EFCore.Sqlite.FunctionalTests\\EFCore.Sqlite.FunctionalTests.csproj",
       "test\\EFCore.Sqlite.Tests\\EFCore.Sqlite.Tests.csproj",
-      "test\\EFCore.Tests\\EFCore.Tests.csproj"
+      "test\\EFCore.Tests\\EFCore.Tests.csproj",
+      "ConsoleApp\\ConsoleApp.csproj"
     ]
   }
 }
