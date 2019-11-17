@@ -45,19 +45,31 @@ namespace Microsoft.EntityFrameworkCore.SqlServer.Query.Internal
         {
             Check.NotNull(binaryExpression, nameof(binaryExpression));
 
-            var visitedExpression = (SqlExpression)base.VisitBinary(binaryExpression);
+            var visitedExpression = base.VisitBinary(binaryExpression);
 
-            if (visitedExpression == null)
+            if (visitedExpression is SqlBinaryExpression sqlBinary)
             {
-                return null;
+                switch (sqlBinary.OperatorType)
+                {
+                    case ExpressionType.LeftShift:
+                    case ExpressionType.RightShift:
+                        return null;
+
+                    case ExpressionType.Add:
+                    case ExpressionType.Subtract:
+                    case ExpressionType.Multiply:
+                    case ExpressionType.Divide:
+                    case ExpressionType.Modulo:
+                        if (_dateTimeDataTypes.Contains(GetProviderType(sqlBinary.Left))
+                            || _dateTimeDataTypes.Contains(GetProviderType(sqlBinary.Right)))
+                        {
+                            return null;
+                        }
+                        break;
+                }
             }
 
-            return visitedExpression is SqlBinaryExpression sqlBinary
-                && _arithmeticOperatorTypes.Contains(sqlBinary.OperatorType)
-                && (_dateTimeDataTypes.Contains(GetProviderType(sqlBinary.Left))
-                    || _dateTimeDataTypes.Contains(GetProviderType(sqlBinary.Right)))
-                    ? null
-                    : visitedExpression;
+            return visitedExpression;
         }
 
         protected override Expression VisitUnary(UnaryExpression unaryExpression)
