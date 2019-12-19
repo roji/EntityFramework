@@ -2384,9 +2384,9 @@ FROM root c
 WHERE ((c[""Discriminator""] = ""Order"") AND ((c[""OrderID""] ^ 1) = 10249))");
         }
 
-        public override async Task Where_shift_left(bool async)
+        public override async Task Where_shift_left_int(bool async)
         {
-            await base.Where_shift_left(async);
+            await base.Where_shift_left_int(async);
 
             AssertSql(
                 @"SELECT c
@@ -2394,14 +2394,74 @@ FROM root c
 WHERE ((c[""Discriminator""] = ""Order"") AND ((c[""OrderID""] << 1) = 20496))");
         }
 
-        public override async Task Where_shift_right(bool async)
+        public override async Task Where_shift_left_uint(bool async)
         {
-            await base.Where_shift_right(async);
+            await base.Where_shift_left_uint(async);
+
+            AssertSql(
+                @"SELECT c
+FROM root c
+WHERE ((c[""Discriminator""] = ""Order"") AND ((c[""OrderID""] << 1) = 20496))");
+        }
+
+        public override async Task Where_shift_left_long(bool async)
+        {
+            await base.Where_shift_left_long(async);
+
+            AssertSql(
+                @"SELECT c
+FROM root c
+WHERE ((c[""Discriminator""] = ""Order"") AND ((c[""OrderID""] << 1) = 20496))");
+        }
+
+        public override async Task Where_shift_left_ulong(bool async)
+        {
+            await base.Where_shift_left_ulong(async);
+
+            AssertSql(
+                @"SELECT c
+FROM root c
+WHERE ((c[""Discriminator""] = ""Order"") AND ((c[""OrderID""] << 1) = 20496))");
+        }
+
+        public override async Task Where_shift_right_int(bool async)
+        {
+            await base.Where_shift_right_int(async);
 
             AssertSql(
                 @"SELECT c
 FROM root c
 WHERE ((c[""Discriminator""] = ""Order"") AND ((c[""OrderID""] >> 1) = 5124))");
+        }
+
+        public override async Task Where_shift_right_uint(bool async)
+        {
+            await base.Where_shift_right_uint(async);
+
+            AssertSql(
+                @"SELECT c
+FROM root c
+WHERE ((c[""Discriminator""] = ""Order"") AND ((c[""OrderID""] << 1) = 20496))");
+        }
+
+        public override async Task Where_shift_right_long(bool async)
+        {
+            await base.Where_shift_right_long(async);
+
+            AssertSql(
+                @"SELECT c
+FROM root c
+WHERE ((c[""Discriminator""] = ""Order"") AND ((c[""OrderID""] << 1) = 20496))");
+        }
+
+        public override async Task Where_shift_right_ulong(bool async)
+        {
+            await base.Where_shift_right_ulong(async);
+
+            AssertSql(
+                @"SELECT c
+FROM root c
+WHERE ((c[""Discriminator""] = ""Order"") AND ((c[""OrderID""] << 1) = 20496))");
         }
 
         [ConditionalFact(Skip = "Issue #17246")]

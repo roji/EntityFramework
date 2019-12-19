@@ -2964,11 +2964,29 @@ FROM [Orders] AS [o]
 WHERE ([o].[OrderID] ^ 1) = 10249");
         }
 
-        public override Task Where_shift_left(bool async)
-            => AssertTranslationFailed(() => base.Where_shift_left(async));
+        public override Task Where_shift_left_int(bool async)
+            => AssertTranslationFailed(() => base.Where_shift_left_int(async));
 
-        public override Task Where_shift_right(bool async)
-            => AssertTranslationFailed(() => base.Where_shift_right(async));
+        public override Task Where_shift_left_uint(bool async)
+            => AssertTranslationFailed(() => base.Where_shift_left_uint(async));
+
+        public override Task Where_shift_left_long(bool async)
+            => AssertTranslationFailed(() => base.Where_shift_left_long(async));
+
+        public override Task Where_shift_left_ulong(bool async)
+            => AssertTranslationFailed(() => base.Where_shift_left_ulong(async));
+
+        public override Task Where_shift_right_int(bool async)
+            => AssertTranslationFailed(() => base.Where_shift_right_int(async));
+
+        public override Task Where_shift_right_uint(bool async)
+            => AssertTranslationFailed(() => base.Where_shift_right_uint(async));
+
+        public override Task Where_shift_right_long(bool async)
+            => AssertTranslationFailed(() => base.Where_shift_right_long(async));
+
+        public override Task Where_shift_right_ulong(bool async)
+            => AssertTranslationFailed(() => base.Where_shift_right_ulong(async));
 
         public override void Select_bitwise_or_with_logical_or()
         {

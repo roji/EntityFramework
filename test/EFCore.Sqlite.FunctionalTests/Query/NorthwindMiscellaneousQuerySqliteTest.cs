@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.TestModels.Northwind;
 using Microsoft.EntityFrameworkCore.TestUtilities;
@@ -18,7 +19,7 @@ namespace Microsoft.EntityFrameworkCore.Query
             : base(fixture)
         {
             Fixture.TestSqlLoggerFactory.Clear();
-            //Fixture.TestSqlLoggerFactory.SetTestOutputHelper(testOutputHelper);
+            Fixture.TestSqlLoggerFactory.SetTestOutputHelper(testOutputHelper);
         }
 
         public override Task Query_expression_with_to_string_and_contains(bool async)
@@ -239,9 +240,9 @@ FROM (
         public override Task Where_bitwise_binary_xor(bool async)
             => AssertTranslationFailed(() => base.Where_bitwise_binary_xor(async));
 
-        public override async Task Where_shift_left(bool async)
+        public override async Task Where_shift_left_int(bool async)
         {
-            await base.Where_shift_left(async);
+            await base.Where_shift_left_int(async);
 
             AssertSql(
                 @"SELECT ""o"".""OrderID"", ""o"".""CustomerID"", ""o"".""EmployeeID"", ""o"".""OrderDate""
@@ -249,14 +250,86 @@ FROM ""Orders"" AS ""o""
 WHERE (""o"".""OrderID"" << 1) = 20496");
         }
 
-        public override async Task Where_shift_right(bool async)
+        public override async Task Where_shift_left_uint(bool async)
         {
-            await base.Where_shift_right(async);
+            await base.Where_shift_left_uint(async);
+
+            AssertSql(
+                @"@__x_0='8' (DbType = String)
+
+SELECT ""e"".""EmployeeID"", ""e"".""City"", ""e"".""Country"", ""e"".""FirstName"", ""e"".""ReportsTo"", ""e"".""Title""
+FROM ""Employees"" AS ""e""
+WHERE (@__x_0 << CAST(""e"".""EmployeeID"" AS INTEGER)) = 16");
+        }
+
+        public override async Task Where_shift_left_long(bool async)
+        {
+            await base.Where_shift_left_long(async);
+
+            AssertSql(
+                @"@__x_0='8' (DbType = String)
+
+SELECT ""e"".""EmployeeID"", ""e"".""City"", ""e"".""Country"", ""e"".""FirstName"", ""e"".""ReportsTo"", ""e"".""Title""
+FROM ""Employees"" AS ""e""
+WHERE (@__x_0 << CAST(""e"".""EmployeeID"" AS INTEGER)) = 16");
+        }
+
+        public override async Task Where_shift_left_ulong(bool async)
+        {
+            await base.Where_shift_left_ulong(async);
+
+            AssertSql(
+                @"@__x_0='8' (DbType = String)
+
+SELECT ""e"".""EmployeeID"", ""e"".""City"", ""e"".""Country"", ""e"".""FirstName"", ""e"".""ReportsTo"", ""e"".""Title""
+FROM ""Employees"" AS ""e""
+WHERE (@__x_0 << CAST(""e"".""EmployeeID"" AS INTEGER)) = 16");
+        }
+
+        public override async Task Where_shift_right_int(bool async)
+        {
+            await base.Where_shift_right_int(async);
 
             AssertSql(
                 @"SELECT ""o"".""OrderID"", ""o"".""CustomerID"", ""o"".""EmployeeID"", ""o"".""OrderDate""
 FROM ""Orders"" AS ""o""
 WHERE (""o"".""OrderID"" >> 1) = 5124");
+        }
+
+        public override async Task Where_shift_right_uint(bool async)
+        {
+            await base.Where_shift_right_uint(async);
+
+            AssertSql(
+                @"@__x_0='8' (DbType = String)
+
+SELECT ""e"".""EmployeeID"", ""e"".""City"", ""e"".""Country"", ""e"".""FirstName"", ""e"".""ReportsTo"", ""e"".""Title""
+FROM ""Employees"" AS ""e""
+WHERE (@__x_0 >> CAST(""e"".""EmployeeID"" AS INTEGER)) = 4");
+        }
+
+        public override async Task Where_shift_right_long(bool async)
+        {
+            await base.Where_shift_right_long(async);
+
+            AssertSql(
+                @"@__x_0='8' (DbType = String)
+
+SELECT ""e"".""EmployeeID"", ""e"".""City"", ""e"".""Country"", ""e"".""FirstName"", ""e"".""ReportsTo"", ""e"".""Title""
+FROM ""Employees"" AS ""e""
+WHERE (@__x_0 >> CAST(""e"".""EmployeeID"" AS INTEGER)) = 4");
+        }
+
+        public override async Task Where_shift_right_ulong(bool async)
+        {
+            await base.Where_shift_right_ulong(async);
+
+            AssertSql(
+                @"@__x_0='8' (DbType = String)
+
+SELECT ""e"".""EmployeeID"", ""e"".""City"", ""e"".""Country"", ""e"".""FirstName"", ""e"".""ReportsTo"", ""e"".""Title""
+FROM ""Employees"" AS ""e""
+WHERE (@__x_0 >> CAST(""e"".""EmployeeID"" AS INTEGER)) = 4");
         }
 
         public override Task Complex_nested_query_doesnt_try_binding_to_grandparent_when_parent_returns_complex_result(bool async)

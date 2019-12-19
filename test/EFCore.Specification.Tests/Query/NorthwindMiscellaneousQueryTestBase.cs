@@ -3676,7 +3676,7 @@ namespace Microsoft.EntityFrameworkCore.Query
 
         [ConditionalTheory]
         [MemberData(nameof(IsAsyncData))]
-        public virtual Task Where_shift_left(bool async)
+        public virtual Task Where_shift_left_int(bool async)
         {
             return AssertQuery(
                 async,
@@ -3686,12 +3686,78 @@ namespace Microsoft.EntityFrameworkCore.Query
 
         [ConditionalTheory]
         [MemberData(nameof(IsAsyncData))]
-        public virtual Task Where_shift_right(bool async)
+        public virtual Task Where_shift_left_uint(bool async)
+        {
+            var x = 8U;
+            return AssertQuery(
+                async,
+                ss => ss.Set<Employee>().Where(e => (x << (int)e.EmployeeID) == 16),
+                entryCount: 1);
+        }
+
+        [ConditionalTheory]
+        [MemberData(nameof(IsAsyncData))]
+        public virtual Task Where_shift_left_long(bool async)
+        {
+            var x = 8L;
+            return AssertQuery(
+                async,
+                ss => ss.Set<Employee>().Where(e => (x << (int)e.EmployeeID) == 16),
+                entryCount: 1);
+        }
+
+        [ConditionalTheory]
+        [MemberData(nameof(IsAsyncData))]
+        public virtual Task Where_shift_left_ulong(bool async)
+        {
+            var x = 8UL;
+            return AssertQuery(
+                async,
+                ss => ss.Set<Employee>().Where(e => (x << (int)e.EmployeeID) == 16),
+                entryCount: 1);
+        }
+
+        [ConditionalTheory]
+        [MemberData(nameof(IsAsyncData))]
+        public virtual Task Where_shift_right_int(bool async)
         {
             return AssertQuery(
                 async,
                 ss => ss.Set<Order>().Where(o => (o.OrderID >> 1) == 5124),
                 entryCount: 2);
+        }
+
+        [ConditionalTheory]
+        [MemberData(nameof(IsAsyncData))]
+        public virtual Task Where_shift_right_uint(bool async)
+        {
+            var x = 8U;
+            return AssertQuery(
+                async,
+                ss => ss.Set<Employee>().Where(e => (x >> (int)e.EmployeeID) == 4),
+                entryCount: 1);
+        }
+
+        [ConditionalTheory]
+        [MemberData(nameof(IsAsyncData))]
+        public virtual Task Where_shift_right_long(bool async)
+        {
+            var x = 8L;
+            return AssertQuery(
+                async,
+                ss => ss.Set<Employee>().Where(e => (x >> (int)e.EmployeeID) == 4),
+                entryCount: 1);
+        }
+
+        [ConditionalTheory]
+        [MemberData(nameof(IsAsyncData))]
+        public virtual Task Where_shift_right_ulong(bool async)
+        {
+            var x = 8UL;
+            return AssertQuery(
+                async,
+                ss => ss.Set<Employee>().Where(e => (x >> (int)e.EmployeeID) == 4),
+                entryCount: 1);
         }
 
         [ConditionalFact]
