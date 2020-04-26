@@ -159,6 +159,84 @@ namespace Microsoft.EntityFrameworkCore.Storage
             return ExecuteImplementation(operation, verifySucceeded, state);
         }
 
+        private TResult Foo<TState, TResult>(
+            Func<DbContext, TState, TResult> operation,
+            Func<DbContext, TState, ExecutionResult<TResult>> verifySucceeded,
+            TState state)
+        {
+            while (true)
+            {
+                try
+                {
+                    Suspended = true;
+                    var result = operation(Dependencies.CurrentContext.Context, state);
+                    Suspended = false;
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    Suspended = false;
+                    if (verifySucceeded != null
+                        && CallOnWrappedException(ex, ShouldVerifySuccessOn))
+                    {
+                        while (true)
+                        {
+                            try
+                            {
+                                Suspended = true;
+                                var verifySucceededResult = verifySucceeded(Dependencies.CurrentContext.Context, state);
+                                Suspended = false;
+                                if (verifySucceededResult.IsSuccessful)
+                                {
+                                    return verifySucceededResult.Result;
+                                }
+                            }
+                            catch (Exception ex2)
+                            {
+                                Suspended = false;
+
+                                if (!CallOnWrappedException(ex2, ShouldRetryOn))
+                                {
+                                    throw;
+                                }
+
+                                PrepareRetry(ex2);
+                                continue;
+                            }
+
+                            break;
+                        }
+                    }
+
+                    if (!CallOnWrappedException(ex, ShouldRetryOn))
+                    {
+                        throw;
+                    }
+
+                    PrepareRetry(ex);
+                }
+            }
+
+            void PrepareRetry(Exception ex)
+            {
+                ExceptionsEncountered.Add(ex);
+
+                var delay = GetNextDelay(ex);
+                if (delay == null)
+                {
+                    throw new RetryLimitExceededException(
+                        CoreStrings.RetryLimitExceeded(MaxRetryCount, GetType().Name), ex);
+                }
+
+                Dependencies.Logger.ExecutionStrategyRetrying(ExceptionsEncountered, delay.Value, async: true);
+
+                OnRetry();
+
+                using var waitEvent = new ManualResetEventSlim(false);
+                waitEvent.WaitHandle.WaitOne(delay.Value);
+            }
+        }
+
         private TResult ExecuteImplementation<TState, TResult>(
             Func<DbContext, TState, TResult> operation,
             Func<DbContext, TState, ExecutionResult<TResult>> verifySucceeded,
