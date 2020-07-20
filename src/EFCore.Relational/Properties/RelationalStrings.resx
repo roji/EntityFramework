@@ -691,4 +691,10 @@
   <data name="SequenceContainsNoElements" xml:space="preserve">
     <value>Sequence contains no elements.</value>
   </data>
+  <data name="BatchExecutorFailedToRollbackToSavepoint" xml:space="preserve">
+    <value>An error occurred while the batch executor was rolling back the transaction to a savepoint, after an exception occured.</value>
+  </data>
+  <data name="BatchExecutorFailedToReleaseSavepoint" xml:space="preserve">
+    <value>An error occurred while the batch executor was releasing a transaction savepoint.</value>
+  </data>
 </root>

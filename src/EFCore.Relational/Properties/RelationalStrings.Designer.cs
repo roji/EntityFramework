@@ -2195,5 +2195,53 @@ namespace Microsoft.EntityFrameworkCore.Diagnostics.Internal
 
             return (EventDefinition)definition;
         }
+
+        /// <summary>
+        ///     An error occurred while the batch executor was rolling back the transaction to a savepoint, after an exception occured.
+        /// </summary>
+        public static EventDefinition BatchExecutorFailedToRollbackToSavepoint([NotNull] IDiagnosticsLogger logger)
+        {
+            var definition = ((RelationalLoggingDefinitions)logger.Definitions).LogBatchExecutorFailedToRollbackToSavepoint;
+            if (definition == null)
+            {
+                definition = LazyInitializer.EnsureInitialized<EventDefinitionBase>(
+                    ref ((RelationalLoggingDefinitions)logger.Definitions).LogBatchExecutorFailedToRollbackToSavepoint,
+                    () => new EventDefinition(
+                        logger.Options,
+                        RelationalEventId.BatchExecutorFailedToRollbackToSavepoint,
+                        LogLevel.Debug,
+                        "RelationalEventId.BatchExecutorFailedToRollbackToSavepoint",
+                        level => LoggerMessage.Define(
+                            level,
+                            RelationalEventId.BatchExecutorFailedToRollbackToSavepoint,
+                            _resourceManager.GetString("BatchExecutorFailedToRollbackToSavepoint"))));
+            }
+
+            return (EventDefinition)definition;
+        }
+
+        /// <summary>
+        ///     An error occurred while the batch executor was releasing a transaction savepoint.
+        /// </summary>
+        public static EventDefinition BatchExecutorFailedToReleaseSavepoint([NotNull] IDiagnosticsLogger logger)
+        {
+            var definition = ((RelationalLoggingDefinitions)logger.Definitions).LogBatchExecutorFailedToReleaseSavepoint;
+            if (definition == null)
+            {
+                definition = LazyInitializer.EnsureInitialized<EventDefinitionBase>(
+                    ref ((RelationalLoggingDefinitions)logger.Definitions).LogBatchExecutorFailedToReleaseSavepoint,
+                    () => new EventDefinition(
+                        logger.Options,
+                        RelationalEventId.BatchExecutorFailedToReleaseSavepoint,
+                        LogLevel.Debug,
+                        "RelationalEventId.BatchExecutorFailedToReleaseSavepoint",
+                        level => LoggerMessage.Define(
+                            level,
+                            RelationalEventId.BatchExecutorFailedToReleaseSavepoint,
+                            _resourceManager.GetString("BatchExecutorFailedToReleaseSavepoint"))));
+            }
+
+            return (EventDefinition)definition;
+        }
     }
 }
