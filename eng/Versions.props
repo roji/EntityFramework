@@ -30,5 +30,6 @@
   </PropertyGroup>
   <PropertyGroup Label="Other dependencies">
     <MicrosoftCodeAnalysisVersion>3.7.0</MicrosoftCodeAnalysisVersion>
+    <BenchmarkDotNetVersion>0.12.1</BenchmarkDotNetVersion>
   </PropertyGroup>
 </Project>
