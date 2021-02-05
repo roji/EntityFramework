@@ -590,7 +590,33 @@ namespace Microsoft.EntityFrameworkCore.Storage
             {
                 CurrentTransaction?.Dispose();
                 ClearTransactions(clearAmbient: false);
-                OpenInternal(errorsExpected);
+
+                var startTime = DateTimeOffset.UtcNow;
+                var stopwatch = Stopwatch.StartNew();
+
+                var interceptionResult = Dependencies.ConnectionLogger.ConnectionOpening(this, startTime);
+
+                try
+                {
+                    if (!interceptionResult.IsSuppressed)
+                    {
+                        OpenDbConnection(errorsExpected);
+                    }
+
+                    Dependencies.ConnectionLogger.ConnectionOpened(this, startTime, stopwatch.Elapsed);
+                }
+                catch (Exception e)
+                {
+                    Dependencies.ConnectionLogger.ConnectionError(this, e, startTime, stopwatch.Elapsed, errorsExpected);
+
+                    throw;
+                }
+
+                if (_openedCount == 0)
+                {
+                    _openedInternally = true;
+                }
+
                 wasOpened = true;
             }
 
@@ -627,7 +653,43 @@ namespace Microsoft.EntityFrameworkCore.Storage
                 }
 
                 ClearTransactions(clearAmbient: false);
-                await OpenInternalAsync(errorsExpected, cancellationToken).ConfigureAwait(false);
+
+                var startTime = DateTimeOffset.UtcNow;
+                var stopwatch = Stopwatch.StartNew();
+
+                var interceptionResult
+                    = await Dependencies.ConnectionLogger.ConnectionOpeningAsync(this, startTime, cancellationToken)
+                        .ConfigureAwait(false);
+
+                try
+                {
+                    if (!interceptionResult.IsSuppressed)
+                    {
+                        await OpenDbConnectionAsync(errorsExpected, cancellationToken).ConfigureAwait(false);
+                    }
+
+                    await Dependencies.ConnectionLogger.ConnectionOpenedAsync(this, startTime, stopwatch.Elapsed, cancellationToken)
+                        .ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    await Dependencies.ConnectionLogger.ConnectionErrorAsync(
+                            this,
+                            e,
+                            startTime,
+                            stopwatch.Elapsed,
+                            errorsExpected,
+                            cancellationToken)
+                        .ConfigureAwait(false);
+
+                    throw;
+                }
+
+                if (_openedCount == 0)
+                {
+                    _openedInternally = true;
+                }
+
                 wasOpened = true;
             }
 
@@ -660,35 +722,6 @@ namespace Microsoft.EntityFrameworkCore.Storage
             }
         }
 
-        private void OpenInternal(bool errorsExpected)
-        {
-            var startTime = DateTimeOffset.UtcNow;
-            var stopwatch = Stopwatch.StartNew();
-
-            var interceptionResult = Dependencies.ConnectionLogger.ConnectionOpening(this, startTime);
-
-            try
-            {
-                if (!interceptionResult.IsSuppressed)
-                {
-                    OpenDbConnection(errorsExpected);
-                }
-
-                Dependencies.ConnectionLogger.ConnectionOpened(this, startTime, stopwatch.Elapsed);
-            }
-            catch (Exception e)
-            {
-                Dependencies.ConnectionLogger.ConnectionError(this, e, startTime, stopwatch.Elapsed, errorsExpected);
-
-                throw;
-            }
-
-            if (_openedCount == 0)
-            {
-                _openedInternally = true;
-            }
-        }
-
         /// <summary>
         ///     Template method that by default calls <see cref="DbConnection.Open" /> but can be overriden
         ///     by providers to make a different call instead.
@@ -696,45 +729,6 @@ namespace Microsoft.EntityFrameworkCore.Storage
         /// <param name="errorsExpected"> Indicates if the connection errors are expected and should be logged as debug message. </param>
         protected virtual void OpenDbConnection(bool errorsExpected)
             => DbConnection.Open();
-
-        private async Task OpenInternalAsync(bool errorsExpected, CancellationToken cancellationToken)
-        {
-            var startTime = DateTimeOffset.UtcNow;
-            var stopwatch = Stopwatch.StartNew();
-
-            var interceptionResult
-                = await Dependencies.ConnectionLogger.ConnectionOpeningAsync(this, startTime, cancellationToken)
-                    .ConfigureAwait(false);
-
-            try
-            {
-                if (!interceptionResult.IsSuppressed)
-                {
-                    await OpenDbConnectionAsync(errorsExpected, cancellationToken).ConfigureAwait(false);
-                }
-
-                await Dependencies.ConnectionLogger.ConnectionOpenedAsync(this, startTime, stopwatch.Elapsed, cancellationToken)
-                    .ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                await Dependencies.ConnectionLogger.ConnectionErrorAsync(
-                        this,
-                        e,
-                        startTime,
-                        stopwatch.Elapsed,
-                        errorsExpected,
-                        cancellationToken)
-                    .ConfigureAwait(false);
-
-                throw;
-            }
-
-            if (_openedCount == 0)
-            {
-                _openedInternally = true;
-            }
-        }
 
         /// <summary>
         ///     Template method that by default calls <see cref="M:System.Data.Common.DbConnection.OpenAsync" /> but can be overriden
