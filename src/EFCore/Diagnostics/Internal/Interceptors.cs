@@ -25,6 +25,7 @@ namespace Microsoft.EntityFrameworkCore.Diagnostics.Internal
         private readonly Dictionary<Type, IInterceptorAggregator> _aggregators;
         private CoreOptionsExtension? _coreOptionsExtension;
         private List<IInterceptor>? _interceptors;
+        private bool _isEmpty;
 
         /// <summary>
         ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -42,26 +43,6 @@ namespace Microsoft.EntityFrameworkCore.Diagnostics.Internal
             _aggregators = interceptorAggregators.ToDictionary(i => i.InterceptorType);
         }
 
-        private IReadOnlyList<IInterceptor> RegisteredInterceptors
-        {
-            get
-            {
-                if (_interceptors == null)
-                {
-                    var interceptors = _injectedInterceptors.ToList();
-                    var appInterceptors = CoreOptionsExtension?.Interceptors;
-                    if (appInterceptors != null)
-                    {
-                        interceptors.AddRange(appInterceptors);
-                    }
-
-                    _interceptors = interceptors;
-                }
-
-                return _interceptors;
-            }
-        }
-
         /// <summary>
         ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
         ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
@@ -70,7 +51,32 @@ namespace Microsoft.EntityFrameworkCore.Diagnostics.Internal
         /// </summary>
         public virtual TInterceptor? Aggregate<TInterceptor>()
             where TInterceptor : class, IInterceptor
-            => (TInterceptor?)_aggregators[typeof(TInterceptor)].AggregateInterceptors(RegisteredInterceptors);
+        {
+            if (_isEmpty)
+            {
+                return null;
+            }
+
+            if (_interceptors == null)
+            {
+                var interceptors = _injectedInterceptors.ToList();
+                var appInterceptors = CoreOptionsExtension?.Interceptors;
+                if (appInterceptors != null)
+                {
+                    interceptors.AddRange(appInterceptors);
+                }
+
+                if (interceptors.Count == 0)
+                {
+                    _isEmpty = true;
+                    return null;
+                }
+
+                _interceptors = interceptors;
+            }
+
+            return (TInterceptor?)_aggregators[typeof(TInterceptor)].AggregateInterceptors(_interceptors);
+        }
 
         /// <summary>
         ///     We resolve this lazily because loggers are created very early in the initialization
