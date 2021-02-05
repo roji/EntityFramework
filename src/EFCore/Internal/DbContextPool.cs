@@ -129,17 +129,32 @@ namespace Microsoft.EntityFrameworkCore.Internal
         ///     any release. You should only use it directly in your code with extreme caution and knowing that
         ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
-        public virtual async ValueTask ReturnAsync(IDbContextPoolable context, CancellationToken cancellationToken = default)
+        public virtual ValueTask ReturnAsync(IDbContextPoolable context, CancellationToken cancellationToken = default)
         {
+            Task task;
+
             if (Interlocked.Increment(ref _count) <= _maxSize)
             {
-                await context.ResetStateAsync(cancellationToken).ConfigureAwait(false);
+                task = context.ResetStateAsync(cancellationToken);
+                if (!task.IsCompletedSuccessfully)
+                {
+                    return ReturnAsyncLong();
+                }
 
                 _pool.Enqueue(context);
             }
             else
             {
                 PooledReturn(context);
+            }
+
+            return default;
+
+            async ValueTask ReturnAsyncLong()
+            {
+                await task.ConfigureAwait(false);
+
+                _pool.Enqueue(context);
             }
         }
 

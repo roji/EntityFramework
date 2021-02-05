@@ -65,7 +65,7 @@ namespace Microsoft.EntityFrameworkCore
         private IServiceScope _serviceScope;
         private DbContextLease _lease = DbContextLease.InactiveLease;
         private DbContextPoolConfigurationSnapshot _configurationSnapshot;
-        private List<IResettableService> _cachedResettableServices;
+        private IResettableService[] _cachedResettableServices;
         private bool _initializing;
         private bool _disposed;
 
@@ -780,19 +780,46 @@ namespace Microsoft.EntityFrameworkCore
         ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
         [EntityFrameworkInternal]
-        async Task IResettableService.ResetStateAsync(CancellationToken cancellationToken)
+        Task IResettableService.ResetStateAsync(CancellationToken cancellationToken)
         {
-            foreach (var service in _cachedResettableServices ??= GetResettableServices())
+            _cachedResettableServices ??= GetResettableServices();
+            Task task;
+            int i;
+
+            // As this is a hot path, we optimistically attempt to reset all services synchronously to save on an additional async
+            // state machine. The moment any reset fails to complete immediately and successfully, we branch off to the long path.
+            for (i = 0; i < _cachedResettableServices.Length; i++)
             {
-                await service.ResetStateAsync(cancellationToken).ConfigureAwait(false);
+                task = _cachedResettableServices[i].ResetStateAsync(cancellationToken);
+
+                if (!task.IsCompletedSuccessfully)
+                {
+                    return ResetStateAsyncLong();
+                }
             }
 
             ClearEvents();
 
             _disposed = true;
+
+            return Task.CompletedTask;
+
+            async Task ResetStateAsyncLong()
+            {
+                await task.ConfigureAwait(false);
+
+                for (i++; i < _cachedResettableServices.Length; i++)
+                {
+                    await _cachedResettableServices[i].ResetStateAsync(cancellationToken).ConfigureAwait(false);
+                }
+
+                ClearEvents();
+
+                _disposed = true;
+            }
         }
 
-        private List<IResettableService> GetResettableServices()
+        private IResettableService[] GetResettableServices()
         {
             var resettableServices = new List<IResettableService>();
 
@@ -810,7 +837,7 @@ namespace Microsoft.EntityFrameworkCore
                 resettableServices.AddRange((_sets.Values.OfType<IResettableService>()));
             }
 
-            return resettableServices;
+            return resettableServices.ToArray();
         }
 
         /// <summary>

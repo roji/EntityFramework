@@ -972,11 +972,14 @@ namespace Microsoft.EntityFrameworkCore.Storage
         /// <summary>
         ///     Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
-        public virtual async ValueTask DisposeAsync()
+        public virtual ValueTask DisposeAsync()
         {
-            if (CurrentTransaction != null)
+            // As this is a hot path, we save on the async state machine when there is no transaction; otherwise we branch into the
+            // long path.
+
+            if (CurrentTransaction is not null)
             {
-                await CurrentTransaction.DisposeAsync().ConfigureAwait(false);
+                return DisposeAsyncLong();
             }
 
             ClearTransactions(clearAmbient: true);
@@ -984,9 +987,30 @@ namespace Microsoft.EntityFrameworkCore.Storage
             if (_connectionOwned
                 && _connection != null)
             {
-                await DisposeDbConnectionAsync().ConfigureAwait(false);
+                // TODO: This could be considered questionable
+                var task = DisposeDbConnectionAsync();
                 _connection = null;
                 _openedCount = 0;
+                _openedInternally = false;
+                return task;
+            }
+
+            return default;
+
+            async ValueTask DisposeAsyncLong()
+            {
+                await CurrentTransaction.DisposeAsync().ConfigureAwait(false);
+
+                ClearTransactions(clearAmbient: true);
+
+                if (_connectionOwned
+                    && _connection is not null)
+                {
+                    await DisposeDbConnectionAsync().ConfigureAwait(false);
+                    _connection = null;
+                    _openedCount = 0;
+                    _openedInternally = false;
+                }
             }
         }
 
