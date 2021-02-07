@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations.Internal;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.EntityFrameworkCore.Utilities;
+using CA = System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.EntityFrameworkCore.Migrations.Design
 {
@@ -479,6 +480,7 @@ namespace Microsoft.EntityFrameworkCore.Migrations.Design
         protected virtual string TryGetProjectFile([NotNull] string projectDir, [NotNull] string fileName)
             => Directory.EnumerateFiles(projectDir, fileName, SearchOption.AllDirectories).FirstOrDefault();
 
+        [CA.RequiresUnreferencedCodeAttribute("TODO-TRIMMING")]
         private bool ContainsForeignMigrations(string migrationsNamespace)
             => (from t in Dependencies.MigrationsAssembly.Assembly.GetConstructibleTypes()
                 where t.Namespace == migrationsNamespace

@@ -3,12 +3,13 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
-using JetBrains.Annotations;
+using JB = JetBrains.Annotations;
 
 #nullable enable
 
@@ -38,19 +39,19 @@ namespace System
             { typeof(void), "void" }
         };
 
-        public static Type UnwrapNullableType(this Type type)
+        public static Type UnwrapNullableType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
             => Nullable.GetUnderlyingType(type) ?? type;
 
-        public static bool IsNullableValueType(this Type type)
+        public static bool IsNullableValueType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
             => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
 
-        public static bool IsNullableType(this Type type)
+        public static bool IsNullableType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
             => !type.IsValueType || type.IsNullableValueType();
 
-        public static bool IsValidEntityType(this Type type)
+        public static bool IsValidEntityType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
             => type.IsClass;
 
-        public static bool IsPropertyBagType(this Type type)
+        public static bool IsPropertyBagType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
         {
             if (type.IsGenericTypeDefinition)
             {
@@ -70,7 +71,7 @@ namespace System
                     ? typeof(Nullable<>).MakeGenericType(type)
                     : type.UnwrapNullableType();
 
-        public static bool IsNumeric(this Type type)
+        public static bool IsNumeric([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
         {
             type = type.UnwrapNullableType();
 
@@ -80,7 +81,7 @@ namespace System
                 || type == typeof(double);
         }
 
-        public static bool IsInteger(this Type type)
+        public static bool IsInteger([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
         {
             type = type.UnwrapNullableType();
 
@@ -95,18 +96,18 @@ namespace System
                 || type == typeof(char);
         }
 
-        public static bool IsSignedInteger(this Type type)
+        public static bool IsSignedInteger([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
             => type == typeof(int)
                 || type == typeof(long)
                 || type == typeof(short)
                 || type == typeof(sbyte);
 
-        public static bool IsAnonymousType(this Type type)
+        public static bool IsAnonymousType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
             => type.Name.StartsWith("<>", StringComparison.Ordinal)
                 && type.GetCustomAttributes(typeof(CompilerGeneratedAttribute), inherit: false).Length > 0
                 && type.Name.Contains("AnonymousType");
 
-        public static bool IsTupleType(this Type type)
+        public static bool IsTupleType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
         {
             if (type == typeof(Tuple))
             {
@@ -133,7 +134,10 @@ namespace System
             return false;
         }
 
-        public static PropertyInfo? GetAnyProperty(this Type type, string name)
+        public static PropertyInfo? GetAnyProperty(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+            this Type type,
+            string name)
         {
             var props = type.GetRuntimeProperties().Where(p => p.Name == name).ToList();
             if (props.Count > 1)
@@ -144,7 +148,10 @@ namespace System
             return props.SingleOrDefault();
         }
 
-        public static MethodInfo GetRequiredMethod(this Type type, string name, params Type[] parameters)
+        public static MethodInfo GetRequiredMethod(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] this Type type,
+            string name,
+            params Type[] parameters)
         {
             var method = type.GetTypeInfo().GetMethod(name, parameters);
 
@@ -162,7 +169,9 @@ namespace System
             return method;
         }
 
-        public static PropertyInfo GetRequiredProperty(this Type type, string name)
+        public static PropertyInfo GetRequiredProperty(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] this Type type,
+            string name)
         {
             var property = type.GetTypeInfo().GetProperty(name);
             if (property == null)
@@ -173,7 +182,10 @@ namespace System
             return property;
         }
 
-        public static FieldInfo GetRequiredDeclaredField(this Type type, string name)
+        public static FieldInfo GetRequiredDeclaredField(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)]
+            this Type type,
+            string name)
         {
             var field = type.GetTypeInfo().GetDeclaredField(name);
             if (field == null)
@@ -184,7 +196,10 @@ namespace System
             return field;
         }
 
-        public static MethodInfo GetRequiredDeclaredMethod(this Type type, string name)
+        public static MethodInfo GetRequiredDeclaredMethod(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
+            this Type type,
+            string name)
         {
             var method = type.GetTypeInfo().GetDeclaredMethod(name);
             if (method == null)
@@ -195,7 +210,10 @@ namespace System
             return method;
         }
 
-        public static PropertyInfo GetRequiredDeclaredProperty(this Type type, string name)
+        public static PropertyInfo GetRequiredDeclaredProperty(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+            this Type type,
+            string name)
         {
             var property = type.GetTypeInfo().GetDeclaredProperty(name);
             if (property == null)
@@ -206,7 +224,10 @@ namespace System
             return property;
         }
 
-        public static MethodInfo GetRequiredRuntimeMethod(this Type type, string name, params Type[] parameters)
+        public static MethodInfo GetRequiredRuntimeMethod(
+                [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] this Type type,
+                string name,
+                params Type[] parameters)
         {
             var method = type.GetTypeInfo().GetRuntimeMethod(name, parameters);
             if (method == null)
@@ -217,7 +238,9 @@ namespace System
             return method;
         }
 
-        public static PropertyInfo GetRequiredRuntimeProperty(this Type type, string name)
+        public static PropertyInfo GetRequiredRuntimeProperty(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] this Type type,
+            string name)
         {
             var property = type.GetTypeInfo().GetRuntimeProperty(name);
             if (property == null)
@@ -228,12 +251,12 @@ namespace System
             return property;
         }
 
-        public static bool IsInstantiable(this Type type)
+        public static bool IsInstantiable([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
             => !type.IsAbstract
                 && !type.IsInterface
                 && (!type.IsGenericType || !type.IsGenericTypeDefinition);
 
-        public static Type UnwrapEnumType(this Type type)
+        public static Type UnwrapEnumType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
         {
             var isNullable = type.IsNullableType();
             var underlyingNonNullableType = isNullable ? type.UnwrapNullableType() : type;
@@ -246,7 +269,7 @@ namespace System
             return isNullable ? MakeNullable(underlyingEnumType) : underlyingEnumType;
         }
 
-        public static Type GetSequenceType(this Type type)
+        public static Type GetSequenceType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
         {
             var sequenceType = TryGetSequenceType(type);
             if (sequenceType == null)
@@ -260,11 +283,13 @@ namespace System
 
 #nullable enable
 
-        public static Type? TryGetSequenceType(this Type type)
+        public static Type? TryGetSequenceType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
             => type.TryGetElementType(typeof(IEnumerable<>))
                 ?? type.TryGetElementType(typeof(IAsyncEnumerable<>));
 
-        public static Type? TryGetElementType(this Type type, Type interfaceOrBaseType)
+        public static Type? TryGetElementType(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type,
+            Type interfaceOrBaseType)
         {
             if (type.IsGenericTypeDefinition)
             {
@@ -292,7 +317,9 @@ namespace System
 
 #nullable disable
 
-        public static bool IsCompatibleWith(this Type propertyType, Type fieldType)
+        public static bool IsCompatibleWith(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type propertyType,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] Type fieldType)
         {
             if (propertyType.IsAssignableFrom(fieldType)
                 || fieldType.IsAssignableFrom(propertyType))
@@ -308,7 +335,9 @@ namespace System
                 && IsCompatibleWith(propertyElementType, fieldElementType);
         }
 
-        public static IEnumerable<Type> GetGenericTypeImplementations(this Type type, Type interfaceOrBaseType)
+        public static IEnumerable<Type> GetGenericTypeImplementations(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] Type interfaceOrBaseType)
         {
             var typeInfo = type.GetTypeInfo();
             if (!typeInfo.IsGenericTypeDefinition)
@@ -333,7 +362,7 @@ namespace System
             }
         }
 
-        public static IEnumerable<Type> GetBaseTypes(this Type type)
+        public static IEnumerable<Type> GetBaseTypes([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
         {
             type = type.BaseType;
 
@@ -345,7 +374,8 @@ namespace System
             }
         }
 
-        public static IEnumerable<Type> GetTypesInHierarchy(this Type type)
+        public static IEnumerable<Type> GetTypesInHierarchy(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
         {
             while (type != null)
             {
@@ -355,7 +385,11 @@ namespace System
             }
         }
 
-        public static ConstructorInfo GetDeclaredConstructor(this Type type, Type[] types)
+        public static ConstructorInfo GetDeclaredConstructor(
+            [DynamicallyAccessedMembers(
+                DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+            this Type type,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] Type[] types)
         {
             types ??= Array.Empty<Type>();
 
@@ -365,7 +399,11 @@ namespace System
                         && c.GetParameters().Select(p => p.ParameterType).SequenceEqual(types));
         }
 
-        public static IEnumerable<PropertyInfo> GetPropertiesInHierarchy(this Type type, string name)
+        public static IEnumerable<PropertyInfo> GetPropertiesInHierarchy(
+            [DynamicallyAccessedMembers(
+                DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+            this Type type,
+            string name)
         {
             do
             {
@@ -385,7 +423,14 @@ namespace System
         }
 
         // Looking up the members through the whole hierarchy allows to find inherited private members.
-        public static IEnumerable<MemberInfo> GetMembersInHierarchy(this Type type)
+        [RequiresUnreferencedCodeAttribute("TODO-TRIMMING")]
+        public static IEnumerable<MemberInfo> GetMembersInHierarchy(
+            [DynamicallyAccessedMembers(
+                DynamicallyAccessedMemberTypes.PublicProperties
+                | DynamicallyAccessedMemberTypes.NonPublicProperties
+                | DynamicallyAccessedMemberTypes.PublicFields
+                | DynamicallyAccessedMemberTypes.NonPublicFields)]
+            this Type type)
         {
             do
             {
@@ -405,7 +450,15 @@ namespace System
             while (type != null);
         }
 
-        public static IEnumerable<MemberInfo> GetMembersInHierarchy(this Type type, string name)
+        [RequiresUnreferencedCodeAttribute("TODO-TRIMMING")]
+        public static IEnumerable<MemberInfo> GetMembersInHierarchy(
+            [DynamicallyAccessedMembers(
+                DynamicallyAccessedMemberTypes.PublicProperties
+                | DynamicallyAccessedMemberTypes.NonPublicProperties
+                | DynamicallyAccessedMemberTypes.PublicFields
+                | DynamicallyAccessedMemberTypes.NonPublicFields)]
+            this Type type,
+            string name)
             => type.GetMembersInHierarchy().Where(m => m.Name == name);
 
         private static readonly Dictionary<Type, object> _commonTypeDictionary = new()
@@ -429,7 +482,8 @@ namespace System
 #pragma warning restore IDE0034 // Simplify 'default' expression
         };
 
-        public static object GetDefaultValue(this Type type)
+        public static object GetDefaultValue(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] this Type type)
         {
             if (!type.IsValueType)
             {
@@ -444,11 +498,13 @@ namespace System
                 : Activator.CreateInstance(type);
         }
 
+        [RequiresUnreferencedCodeAttribute("TODO-TRIMMING")]
         public static IEnumerable<TypeInfo> GetConstructibleTypes(this Assembly assembly)
             => assembly.GetLoadableDefinedTypes().Where(
                 t => !t.IsAbstract
                     && !t.IsGenericTypeDefinition);
 
+        [RequiresUnreferencedCodeAttribute("TODO-TRIMMING")]
         public static IEnumerable<TypeInfo> GetLoadableDefinedTypes(this Assembly assembly)
         {
             try
@@ -461,7 +517,8 @@ namespace System
             }
         }
 
-        public static bool IsQueryableType(this Type type)
+        public static bool IsQueryableType(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
         {
             if (type.IsGenericType
                 && type.GetGenericTypeDefinition() == typeof(IQueryable<>))
@@ -478,14 +535,19 @@ namespace System
         ///     any release. You should only use it directly in your code with extreme caution and knowing that
         ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
-        public static string DisplayName([NotNull] this Type type, bool fullName = true)
+        public static string DisplayName(
+            [JB.NotNull, DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type,
+            bool fullName = true)
         {
             var stringBuilder = new StringBuilder();
             ProcessType(stringBuilder, type, fullName);
             return stringBuilder.ToString();
         }
 
-        private static void ProcessType(StringBuilder builder, Type type, bool fullName)
+        private static void ProcessType(
+            StringBuilder builder,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] Type type,
+            bool fullName)
         {
             if (type.IsGenericType)
             {
@@ -504,74 +566,83 @@ namespace System
             {
                 builder.Append(fullName ? type.FullName : type.Name);
             }
+
+            static void ProcessArrayType(
+                StringBuilder builder,
+                [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] Type type,
+                bool fullName)
+            {
+                var innerType = type;
+                while (innerType.IsArray)
+                {
+                    innerType = innerType.GetElementType();
+                }
+
+                ProcessType(builder, innerType, fullName);
+
+                while (type.IsArray)
+                {
+                    builder.Append('[');
+                    builder.Append(',', type.GetArrayRank() - 1);
+                    builder.Append(']');
+                    type = type.GetElementType();
+                }
+            }
+
+            static void ProcessGenericType(
+                StringBuilder builder,
+                [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] Type type,
+                [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] Type[] genericArguments,
+                int length,
+                bool fullName)
+            {
+                var offset = type.IsNested ? type.DeclaringType.GetGenericArguments().Length : 0;
+
+                if (fullName)
+                {
+                    if (type.IsNested)
+                    {
+                        ProcessGenericType(builder, type.DeclaringType, genericArguments, offset, fullName);
+                        builder.Append('+');
+                    }
+                    else
+                    {
+                        builder.Append(type.Namespace);
+                        builder.Append('.');
+                    }
+                }
+
+                var genericPartIndex = type.Name.IndexOf('`');
+                if (genericPartIndex <= 0)
+                {
+                    builder.Append(type.Name);
+                    return;
+                }
+
+                builder.Append(type.Name, 0, genericPartIndex);
+                builder.Append('<');
+
+                for (var i = offset; i < length; i++)
+                {
+                    ProcessType(builder, genericArguments[i], fullName);
+                    if (i + 1 == length)
+                    {
+                        continue;
+                    }
+
+                    builder.Append(',');
+                    if (!genericArguments[i + 1].IsGenericParameter)
+                    {
+                        builder.Append(' ');
+                    }
+                }
+
+                builder.Append('>');
+            }
         }
 
-        private static void ProcessArrayType(StringBuilder builder, Type type, bool fullName)
-        {
-            var innerType = type;
-            while (innerType.IsArray)
-            {
-                innerType = innerType.GetElementType();
-            }
-
-            ProcessType(builder, innerType, fullName);
-
-            while (type.IsArray)
-            {
-                builder.Append('[');
-                builder.Append(',', type.GetArrayRank() - 1);
-                builder.Append(']');
-                type = type.GetElementType();
-            }
-        }
-
-        private static void ProcessGenericType(StringBuilder builder, Type type, Type[] genericArguments, int length, bool fullName)
-        {
-            var offset = type.IsNested ? type.DeclaringType.GetGenericArguments().Length : 0;
-
-            if (fullName)
-            {
-                if (type.IsNested)
-                {
-                    ProcessGenericType(builder, type.DeclaringType, genericArguments, offset, fullName);
-                    builder.Append('+');
-                }
-                else
-                {
-                    builder.Append(type.Namespace);
-                    builder.Append('.');
-                }
-            }
-
-            var genericPartIndex = type.Name.IndexOf('`');
-            if (genericPartIndex <= 0)
-            {
-                builder.Append(type.Name);
-                return;
-            }
-
-            builder.Append(type.Name, 0, genericPartIndex);
-            builder.Append('<');
-
-            for (var i = offset; i < length; i++)
-            {
-                ProcessType(builder, genericArguments[i], fullName);
-                if (i + 1 == length)
-                {
-                    continue;
-                }
-
-                builder.Append(',');
-                if (!genericArguments[i + 1].IsGenericParameter)
-                {
-                    builder.Append(' ');
-                }
-            }
-
-            builder.Append('>');
-        }
-
-        public static IEnumerable<string> GetNamespaces([NotNull] this Type type)
+        public static IEnumerable<string> GetNamespaces(
+            [JB.NotNull,DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
         {
             if (_builtInTypeNames.ContainsKey(type))
             {
@@ -592,7 +663,10 @@ namespace System
             }
         }
 
-        public static ConstantExpression GetDefaultValueConstant(this Type type)
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2085:UnrecognizedReflectionPattern",
+            Justification = "TODO-TRIMMING, probably correct to suppress but not sure")]
+        public static ConstantExpression GetDefaultValueConstant(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.None)] this Type type)
             => (ConstantExpression)_generateDefaultValueConstantMethod
                 .MakeGenericMethod(type).Invoke(null, Array.Empty<object>());
 
