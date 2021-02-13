@@ -52,7 +52,7 @@ namespace Microsoft.EntityFrameworkCore.Storage
         ///     current database provider.
         /// </summary>
         protected virtual IExecutionStrategy CreateDefaultStrategy([NotNull] ExecutionStrategyDependencies dependencies)
-            => new NonRetryingExecutionStrategy(Dependencies);
+            => new RelationalNonRetryingExecutionStrategy(Dependencies);
 
         /// <summary>
         ///     Creates an <see cref="IExecutionStrategy" /> for the current database provider.

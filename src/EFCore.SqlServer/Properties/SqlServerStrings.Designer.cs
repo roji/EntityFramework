@@ -222,6 +222,7 @@ namespace Microsoft.EntityFrameworkCore.SqlServer.Internal
         /// <summary>
         ///     An exception has been raised that is likely due to a transient failure. Consider enabling transient error resiliency by adding 'EnableRetryOnFailure' to the 'UseSqlServer' call.
         /// </summary>
+        [Obsolete]
         public static string TransientExceptionDetected
             => GetString("TransientExceptionDetected");
 

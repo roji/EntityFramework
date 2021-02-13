@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore.SqlServer.Internal;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Storage;
 
 #nullable enable
@@ -59,7 +59,7 @@ namespace Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal
             }
             catch (Exception ex) when (ExecutionStrategy.CallOnWrappedException(ex, SqlServerTransientExceptionDetector.ShouldRetryOn))
             {
-                throw new InvalidOperationException(SqlServerStrings.TransientExceptionDetected, ex);
+                throw new InvalidOperationException(CoreStrings.TransientExceptionDetected, ex);
             }
         }
 
@@ -81,7 +81,7 @@ namespace Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal
             }
             catch (Exception ex) when (ExecutionStrategy.CallOnWrappedException(ex, SqlServerTransientExceptionDetector.ShouldRetryOn))
             {
-                throw new InvalidOperationException(SqlServerStrings.TransientExceptionDetected, ex);
+                throw new InvalidOperationException(CoreStrings.TransientExceptionDetected, ex);
             }
         }
     }
