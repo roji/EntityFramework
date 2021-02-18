@@ -35,7 +35,7 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
         private IMemoryCache? _memoryCache;
         private bool _sensitiveDataLoggingEnabled;
         private bool _detailedErrorsEnabled;
-        private bool _concurrencyDetectionEnabled = true;
+        private bool _concurrencyDetectionEnabled = false;
         private QueryTrackingBehavior _queryTrackingBehavior = QueryTrackingBehavior.TrackAll;
         private IDictionary<(Type, Type?), Type>? _replacedServices;
         private int? _maxPoolSize;
