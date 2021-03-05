@@ -556,9 +556,9 @@ namespace Microsoft.EntityFrameworkCore
                 {
                     var transactionManager = database.GetTransactionManager();
 
-                    return transactionManager is IRelationalTransactionManager relationalTransactionManager
+                    return new ValueTask<IDbContextTransaction>(transactionManager is IRelationalTransactionManager relationalTransactionManager
                         ? relationalTransactionManager.BeginTransactionAsync(isolationLevel, ct)
-                        : transactionManager.BeginTransactionAsync(ct);
+                        : transactionManager.BeginTransactionAsync(ct));
                 }, cancellationToken);
 
         /// <summary>

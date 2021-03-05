@@ -1486,7 +1486,7 @@ namespace Microsoft.EntityFrameworkCore.Query
                             verifySucceeded: null)
                         .ConfigureAwait(false);
 
-                    async Task<RelationalDataReader> InitializeReaderAsync(
+                    async ValueTask<RelationalDataReader> InitializeReaderAsync(
                         RelationalQueryContext queryContext,
                         RelationalCommandCache relationalCommandCache,
                         bool detailedErrorsEnabled,
@@ -1807,7 +1807,7 @@ namespace Microsoft.EntityFrameworkCore.Query
                             verifySucceeded: null)
                         .ConfigureAwait(false);
 
-                    async Task<RelationalDataReader> InitializeReaderAsync(
+                    async ValueTask<RelationalDataReader> InitializeReaderAsync(
                         RelationalQueryContext queryContext,
                         RelationalCommandCache relationalCommandCache,
                         bool detailedErrorsEnabled,

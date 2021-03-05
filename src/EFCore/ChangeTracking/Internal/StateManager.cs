@@ -1207,15 +1207,15 @@ namespace Microsoft.EntityFrameworkCore.ChangeTracking.Internal
         public virtual Task<int> SaveChangesAsync(
             bool acceptAllChangesOnSuccess,
             CancellationToken cancellationToken = default)
-            => Context.Database.AutoTransactionsEnabled
+            => (Context.Database.AutoTransactionsEnabled
                 ? Dependencies.ExecutionStrategyFactory.Create().ExecuteAsync(
                     (StateManager: this, AcceptAllChangesOnSuccess: acceptAllChangesOnSuccess),
                     (_, t, cancellationToken) => SaveChangesAsync(t.StateManager, t.AcceptAllChangesOnSuccess, cancellationToken),
                     null,
                     cancellationToken)
-                : SaveChangesAsync(this, acceptAllChangesOnSuccess, cancellationToken);
+                : SaveChangesAsync(this, acceptAllChangesOnSuccess, cancellationToken)).AsTask();
 
-        private static async Task<int> SaveChangesAsync(
+        private static async ValueTask<int> SaveChangesAsync(
             StateManager stateManager,
             bool acceptAllChangesOnSuccess,
             CancellationToken cancellationToken)

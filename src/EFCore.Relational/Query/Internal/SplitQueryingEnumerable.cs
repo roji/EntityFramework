@@ -363,7 +363,7 @@ namespace Microsoft.EntityFrameworkCore.Query.Internal
                 }
             }
 
-            private static async Task<bool> InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+            private static async ValueTask<bool> InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
             {
                 EntityFrameworkEventSource.Log.QueryExecuting();
 

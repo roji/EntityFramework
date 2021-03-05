@@ -66,10 +66,10 @@ namespace Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal
         ///     any release. You should only use it directly in your code with extreme caution and knowing that
         ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
-        public virtual async Task<TResult> ExecuteAsync<TState, TResult>(
+        public virtual async ValueTask<TResult> ExecuteAsync<TState, TResult>(
             TState state,
-            Func<DbContext, TState, CancellationToken, Task<TResult>> operation,
-            Func<DbContext, TState, CancellationToken, Task<ExecutionResult<TResult>>>? verifySucceeded,
+            Func<DbContext, TState, CancellationToken, ValueTask<TResult>> operation,
+            Func<DbContext, TState, CancellationToken, ValueTask<ExecutionResult<TResult>>>? verifySucceeded,
             CancellationToken cancellationToken)
         {
             try

@@ -527,7 +527,7 @@ namespace Microsoft.EntityFrameworkCore.Storage
         ///     A task that represents the asynchronous operation. The task result contains the result of the command.
         /// </returns>
         /// <exception cref="OperationCanceledException"> If the <see cref="CancellationToken"/> is canceled. </exception>
-        public virtual async Task<RelationalDataReader> ExecuteReaderAsync(
+        public virtual async ValueTask<RelationalDataReader> ExecuteReaderAsync(
             RelationalCommandParameterObject parameterObject,
             CancellationToken cancellationToken = default)
         {

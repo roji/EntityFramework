@@ -145,7 +145,7 @@ namespace Microsoft.EntityFrameworkCore
         /// </returns>
         public static Task<TResult> ExecuteAsync<TResult>(
             this IExecutionStrategy strategy,
-            Func<Task<TResult>> operation)
+            Func<ValueTask<TResult>> operation)
         {
             Check.NotNull(operation, nameof(operation));
 
@@ -174,7 +174,7 @@ namespace Microsoft.EntityFrameworkCore
         /// <exception cref="OperationCanceledException"> If the <see cref="CancellationToken"/> is canceled. </exception>
         public static Task<TResult> ExecuteAsync<TResult>(
             this IExecutionStrategy strategy,
-            Func<CancellationToken, Task<TResult>> operation,
+            Func<CancellationToken, ValueTask<TResult>> operation,
             CancellationToken cancellationToken)
         {
             Check.NotNull(operation, nameof(operation));
@@ -262,7 +262,7 @@ namespace Microsoft.EntityFrameworkCore
         public static Task<TResult> ExecuteAsync<TState, TResult>(
             this IExecutionStrategy strategy,
             TState state,
-            Func<TState, Task<TResult>> operation)
+            Func<TState, ValueTask<TResult>> operation)
         {
             Check.NotNull(operation, nameof(operation));
 
@@ -312,7 +312,7 @@ namespace Microsoft.EntityFrameworkCore
         public static Task<TResult> ExecuteAsync<TState, TResult>(
             this IExecutionStrategy strategy,
             TState state,
-            Func<TState, CancellationToken, Task<TResult>> operation,
+            Func<TState, CancellationToken, ValueTask<TResult>> operation,
             CancellationToken cancellationToken)
             => strategy.ExecuteAsync(state, operation, verifySucceeded: null, cancellationToken: cancellationToken);
 
@@ -339,7 +339,7 @@ namespace Microsoft.EntityFrameworkCore
             => Check.NotNull(strategy, nameof(strategy)).Execute(
                 state,
                 (c, s) => operation(s),
-                verifySucceeded == null ? (Func<DbContext, TState, ExecutionResult<TResult>>?)null : (c, s) => verifySucceeded(s));
+                verifySucceeded == null ? null : (c, s) => verifySucceeded(s));
 
         /// <summary>
         ///     Executes the specified asynchronous operation and returns the result.
@@ -368,15 +368,15 @@ namespace Microsoft.EntityFrameworkCore
         public static Task<TResult> ExecuteAsync<TState, TResult>(
             this IExecutionStrategy strategy,
             TState state,
-            Func<TState, CancellationToken, Task<TResult>> operation,
-            Func<TState, CancellationToken, Task<ExecutionResult<TResult>>>? verifySucceeded,
+            Func<TState, CancellationToken, ValueTask<TResult>> operation,
+            Func<TState, CancellationToken, ValueTask<ExecutionResult<TResult>>>? verifySucceeded,
             CancellationToken cancellationToken = default)
             => Check.NotNull(strategy, nameof(strategy)).ExecuteAsync(
                 state,
                 (c, s, ct) => operation(s, ct),
                 verifySucceeded == null
-                    ? (Func<DbContext, TState, CancellationToken, Task<ExecutionResult<TResult>>>?)null
-                    : (c, s, ct) => verifySucceeded(s, ct), cancellationToken);
+                    ? null
+                    : (c, s, ct) => verifySucceeded(s, ct), cancellationToken).AsTask();
 
         /// <summary>
         ///     Executes the specified operation in a transaction. Allows to check whether
@@ -749,7 +749,7 @@ namespace Microsoft.EntityFrameworkCore
                     return s.Result;
                 }, async (c, s, ct) => new ExecutionResult<TResult>(
                     s.CommitFailed && await s.VerifySucceeded(s.State, ct).ConfigureAwait(false),
-                    s.Result), cancellationToken);
+                    s.Result), cancellationToken).AsTask();
 
         private sealed class ExecutionState<TState, TResult>
         {

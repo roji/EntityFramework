@@ -59,10 +59,10 @@ namespace Microsoft.EntityFrameworkCore.Storage
         ///     The operation has not succeeded after the configured number of retries.
         /// </exception>
         /// <exception cref="OperationCanceledException"> If the <see cref="CancellationToken"/> is canceled. </exception>
-        Task<TResult> ExecuteAsync<TState, TResult>(
+        ValueTask<TResult> ExecuteAsync<TState, TResult>(
             TState state,
-            Func<DbContext, TState, CancellationToken, Task<TResult>> operation,
-            Func<DbContext, TState, CancellationToken, Task<ExecutionResult<TResult>>>? verifySucceeded,
+            Func<DbContext, TState, CancellationToken, ValueTask<TResult>> operation,
+            Func<DbContext, TState, CancellationToken, ValueTask<ExecutionResult<TResult>>>? verifySucceeded,
             CancellationToken cancellationToken = default);
     }
 }
