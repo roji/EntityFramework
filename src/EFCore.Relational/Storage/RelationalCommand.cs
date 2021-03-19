@@ -490,66 +490,69 @@ namespace Microsoft.EntityFrameworkCore.Storage
             var logger = parameterObject.Logger;
             var detailedErrorsEnabled = parameterObject.DetailedErrorsEnabled;
 
-            var commandId = Guid.NewGuid();
+            // var commandId = Guid.NewGuid();
+            var commandId = default(Guid);
             var command = CreateDbCommand(parameterObject, commandId, DbCommandMethod.ExecuteReader);
 
             await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
-            var startTime = DateTimeOffset.UtcNow;
-            _stopwatch.Restart();
+            // var startTime = DateTimeOffset.UtcNow;
+            // _stopwatch.Restart();
 
             var readerOpen = false;
             DbDataReader reader;
             try
             {
-                var interceptionResult = logger == null
-                    ? default
-                    : await logger.CommandReaderExecutingAsync(
-                            connection,
-                            command,
-                            context,
-                            commandId,
-                            connection.ConnectionId,
-                            startTime,
-                            cancellationToken)
-                        .ConfigureAwait(false);
+                // var interceptionResult = logger == null
+                //     ? default
+                //     : await logger.CommandReaderExecutingAsync(
+                //             connection,
+                //             command,
+                //             context,
+                //             commandId,
+                //             connection.ConnectionId,
+                //             startTime,
+                //             cancellationToken)
+                //         .ConfigureAwait(false);
 
-                reader = interceptionResult.HasResult
-                    ? interceptionResult.Result
-                    : await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+                // reader = interceptionResult.HasResult
+                //     ? interceptionResult.Result
+                //     : await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
 
-                if (logger != null)
-                {
-                    reader = await logger.CommandReaderExecutedAsync(
-                            connection,
-                            command,
-                            context,
-                            commandId,
-                            connection.ConnectionId,
-                            reader,
-                            startTime,
-                            _stopwatch.Elapsed,
-                            cancellationToken)
-                        .ConfigureAwait(false);
-                }
+                reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+
+                // if (logger != null)
+                // {
+                //     reader = await logger.CommandReaderExecutedAsync(
+                //             connection,
+                //             command,
+                //             context,
+                //             commandId,
+                //             connection.ConnectionId,
+                //             reader,
+                //             startTime,
+                //             _stopwatch.Elapsed,
+                //             cancellationToken)
+                //         .ConfigureAwait(false);
+                // }
             }
-            catch (Exception exception)
+            catch
             {
-                if (logger != null)
-                {
-                    await logger.CommandErrorAsync(
-                            connection,
-                            command,
-                            context,
-                            DbCommandMethod.ExecuteReader,
-                            commandId,
-                            connection.ConnectionId,
-                            exception,
-                            startTime,
-                            _stopwatch.Elapsed,
-                            cancellationToken)
-                        .ConfigureAwait(false);
-                }
+                // if (logger != null)
+                // {
+                //     await logger.CommandErrorAsync(
+                //             connection,
+                //             command,
+                //             context,
+                //             DbCommandMethod.ExecuteReader,
+                //             commandId,
+                //             connection.ConnectionId,
+                //             exception,
+                //             startTime,
+                //             _stopwatch.Elapsed,
+                //             cancellationToken)
+                //         .ConfigureAwait(false);
+                // }
 
                 await CleanupCommandAsync(command, connection).ConfigureAwait(false);
 
@@ -600,23 +603,25 @@ namespace Microsoft.EntityFrameworkCore.Storage
             DbCommandMethod commandMethod)
         {
             var (connection, context, logger) = (parameterObject.Connection, parameterObject.Context, parameterObject.Logger);
-            var connectionId = connection.ConnectionId;
+            // var connectionId = connection.ConnectionId;
 
-            var startTime = DateTimeOffset.UtcNow;
-            _stopwatch.Restart();
+            // var startTime = DateTimeOffset.UtcNow;
+            // _stopwatch.Restart();
 
-            var interceptionResult = logger?.CommandCreating(connection, commandMethod, context, commandId, connectionId, startTime)
-                ?? default;
+            // var interceptionResult = logger?.CommandCreating(connection, commandMethod, context, commandId, connectionId, startTime)
+            //     ?? default;
 
-            var command = interceptionResult.HasResult
-                ? interceptionResult.Result
-                : connection.DbConnection.CreateCommand();
+            // var command = interceptionResult.HasResult
+            //     ? interceptionResult.Result
+            //     : connection.DbConnection.CreateCommand();
 
-            if (logger != null)
-            {
-                command = logger.CommandCreated(
-                    connection, command, commandMethod, context, commandId, connectionId, startTime, _stopwatch.Elapsed);
-            }
+            var command = connection.DbConnection.CreateCommand();
+
+            // if (logger != null)
+            // {
+            //     command = logger.CommandCreated(
+            //         connection, command, commandMethod, context, commandId, connectionId, startTime, _stopwatch.Elapsed);
+            // }
 
             command.CommandText = CommandText;
 

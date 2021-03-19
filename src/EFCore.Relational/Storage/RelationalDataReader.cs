@@ -157,35 +157,35 @@ namespace Microsoft.EntityFrameworkCore.Storage
         {
             if (!_disposed)
             {
-                var interceptionResult = default(InterceptionResult);
+                // var interceptionResult = default(InterceptionResult);
                 try
                 {
                     await _reader.CloseAsync().ConfigureAwait(false); // can throw
 
-                    if (_logger != null)
-                    {
-                        interceptionResult = _logger.DataReaderDisposing(
-                            _relationalConnection,
-                            _command,
-                            _reader,
-                            _commandId,
-                            _reader.RecordsAffected,
-                            _readCount,
-                            _startTime,
-                            _stopwatch.Elapsed); // can throw
-                    }
+                    // if (_logger != null)
+                    // {
+                    //     interceptionResult = _logger.DataReaderDisposing(
+                    //         _relationalConnection,
+                    //         _command,
+                    //         _reader,
+                    //         _commandId,
+                    //         _reader.RecordsAffected,
+                    //         _readCount,
+                    //         _startTime,
+                    //         _stopwatch.Elapsed); // can throw
+                    // }
                 }
                 finally
                 {
                     _disposed = true;
 
-                    if (!interceptionResult.IsSuppressed)
-                    {
+                    // if (!interceptionResult.IsSuppressed)
+                    // {
                         await _reader.DisposeAsync().ConfigureAwait(false);
                         _command.Parameters.Clear();
                         await _command.DisposeAsync().ConfigureAwait(false);
                         await _relationalConnection.CloseAsync().ConfigureAwait(false);
-                    }
+                    // }
                 }
             }
         }
