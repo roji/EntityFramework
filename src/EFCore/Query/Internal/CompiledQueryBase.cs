@@ -59,8 +59,9 @@ namespace Microsoft.EntityFrameworkCore.Query.Internal
             params object?[] parameters)
         {
             var executor = EnsureExecutor(context);
-            var queryContextFactory = context.GetService<IQueryContextFactory>();
-            var queryContext = queryContextFactory.Create();
+            // var queryContextFactory = context.GetService<IQueryContextFactory>();
+            // var queryContext = queryContextFactory.Create();
+            var queryContext = context.QueryContext;
 
             queryContext.CancellationToken = cancellationToken;
 

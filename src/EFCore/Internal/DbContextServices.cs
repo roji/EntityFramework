@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -34,6 +35,7 @@ namespace Microsoft.EntityFrameworkCore.Internal
         private ICurrentDbContext? _currentContext;
         private IModel? _model;
         private IModel? _designTimeModel;
+        private QueryContext? _queryContext;
         private bool _inOnModelCreating;
 
         /// <summary>
@@ -50,6 +52,7 @@ namespace Microsoft.EntityFrameworkCore.Internal
             _scopedProvider = scopedProvider;
             _contextOptions = contextOptions;
             _currentContext = new CurrentDbContext(context);
+            _queryContext = _scopedProvider.GetRequiredService<IQueryContextFactory>().Create();
 
             var providers = _scopedProvider.GetService<IEnumerable<IDatabaseProvider>>()?.ToList();
             var providerCount = providers?.Count ?? 0;
@@ -142,5 +145,14 @@ namespace Microsoft.EntityFrameworkCore.Internal
         /// </summary>
         public virtual IServiceProvider InternalServiceProvider
             => _scopedProvider!;
+
+        /// <summary>
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
+        /// </summary>
+        public virtual QueryContext QueryContext
+            => _queryContext!;
     }
 }
