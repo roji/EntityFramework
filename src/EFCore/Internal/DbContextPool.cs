@@ -23,13 +23,7 @@ namespace Microsoft.EntityFrameworkCore.Internal
     public class DbContextPool<TContext> : IDbContextPool<TContext>, IDisposable, IAsyncDisposable
         where TContext : DbContext
     {
-        /// <summary>
-        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-        ///     any release. You should only use it directly in your code with extreme caution and knowing that
-        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-        /// </summary>
-        public const int DefaultPoolSize = 128;
+        private const int DefaultPoolSize = 32;
 
         private readonly ConcurrentQueue<IDbContextPoolable> _pool = new();
 
@@ -47,11 +41,6 @@ namespace Microsoft.EntityFrameworkCore.Internal
         public DbContextPool(DbContextOptions<TContext> options)
         {
             _maxSize = options.FindExtension<CoreOptionsExtension>()?.MaxPoolSize ?? DefaultPoolSize;
-
-            if (_maxSize <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(CoreOptionsExtension.MaxPoolSize), CoreStrings.InvalidPoolSize);
-            }
 
             options.Freeze();
 

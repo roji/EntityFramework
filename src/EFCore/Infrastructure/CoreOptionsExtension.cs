@@ -488,11 +488,6 @@ namespace Microsoft.EntityFrameworkCore.Infrastructure
         /// <param name="options"> The options being validated. </param>
         public virtual void Validate(IDbContextOptions options)
         {
-            if (MaxPoolSize.HasValue && MaxPoolSize <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(MaxPoolSize), CoreStrings.InvalidPoolSize);
-            }
-
             if (_internalServiceProvider != null)
             {
                 if (ReplacedServices != null)
