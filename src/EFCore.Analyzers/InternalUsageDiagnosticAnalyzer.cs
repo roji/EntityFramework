@@ -80,7 +80,7 @@ namespace Microsoft.EntityFrameworkCore
                     AnalyzeMember(context, ((IMethodReferenceOperation)context.Operation).Method);
                     break;
                 case OperationKind.ObjectCreation:
-                    AnalyzeMember(context, ((IObjectCreationOperation)context.Operation).Constructor);
+                    AnalyzeMember(context, ((IObjectCreationOperation)context.Operation).Constructor!); // TODO: Nullability
                     break;
                 case OperationKind.Invocation:
                     AnalyzeInvocation(context, (IInvocationOperation)context.Operation);

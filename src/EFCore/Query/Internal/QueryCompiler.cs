@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -131,6 +133,34 @@ namespace Microsoft.EntityFrameworkCore.Query.Internal
         ///     any release. You should only use it directly in your code with extreme caution and knowing that
         ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
+        public virtual Expression<Func<QueryContext, TResult>> CompileQueryExpressionCore<TResult>(
+            IDatabase database,
+            Expression query,
+            IModel model,
+            bool async)
+            => database.CompileQueryExpression<TResult>(query, async);
+
+        /// <summary>
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
+        /// </summary>
+        public virtual Expression<Func<QueryContext, TResult>> CreateCompiledQueryExpression<TResult>(Expression query)
+        {
+            Check.NotNull(query, nameof(query));
+
+            query = ExtractParameters(query, _queryContextFactory.Create(), _logger, parameterize: false);
+
+            return CompileQueryExpressionCore<TResult>(_database, query, _model, false);
+        }
+
+        /// <summary>
+        ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+        ///     any release. You should only use it directly in your code with extreme caution and knowing that
+        ///     doing so can result in application failures when updating to a new Entity Framework Core release.
+        /// </summary>
         public virtual TResult ExecuteAsync<TResult>(Expression query, CancellationToken cancellationToken = default)
         {
             Check.NotNull(query, nameof(query));
@@ -188,6 +218,36 @@ namespace Microsoft.EntityFrameworkCore.Query.Internal
                 generateContextAccessors);
 
             return visitor.ExtractParameters(query);
+        }
+
+        private sealed class QueryExpressionRewriter : ExpressionVisitor
+        {
+            private readonly object _context;
+            private readonly IReadOnlyCollection<ParameterExpression> _parameters;
+
+            public QueryExpressionRewriter(
+                object context,
+                IReadOnlyCollection<ParameterExpression> parameters)
+            {
+                _context = context;
+                _parameters = parameters;
+            }
+
+            protected override Expression VisitParameter(ParameterExpression parameterExpression)
+            {
+                Check.NotNull(parameterExpression, nameof(parameterExpression));
+
+                if (_context.GetType().IsAssignableFrom(parameterExpression.Type))
+                {
+                    return Expression.Constant(_context);
+                }
+
+                return _parameters.Contains(parameterExpression)
+                    ? Expression.Parameter(
+                        parameterExpression.Type,
+                        QueryCompilationContext.QueryParameterPrefix + parameterExpression.Name)
+                    : parameterExpression;
+            }
         }
     }
 }

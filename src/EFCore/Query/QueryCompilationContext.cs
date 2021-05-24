@@ -179,6 +179,30 @@ namespace Microsoft.EntityFrameworkCore.Query
 
             Logger.QueryCompilationStarting(_expressionPrinter, query);
 
+            var queryExecutorExpression = CreateQueryExecutorExpression<TResult>(query);
+
+            try
+            {
+                return queryExecutorExpression.Compile();
+            }
+            finally
+            {
+                Logger.QueryExecutionPlanned(_expressionPrinter, queryExecutorExpression);
+            }
+        }
+
+        /// <summary>
+        ///     Creates an expression for the query executor func which gives results for this query.
+        /// </summary>
+        /// <typeparam name="TResult"> The result type of this query. </typeparam>
+        /// <param name="query"> The query to generate executor for. </param>
+        /// <returns> Returns an expression which can be used to get results of this query. </returns>
+        public virtual Expression<Func<QueryContext, TResult>> CreateQueryExecutorExpression<TResult>(Expression query)
+        {
+            Check.NotNull(query, nameof(query));
+
+            // TODO: Log in this method?
+
             query = _queryTranslationPreprocessorFactory.Create(this).Process(query);
             // Convert EntityQueryable to ShapedQueryExpression
             query = _queryableMethodTranslatingExpressionVisitorFactory.Create(this).Visit(query);
@@ -192,18 +216,7 @@ namespace Microsoft.EntityFrameworkCore.Query
             // wrap the query with code adding those parameters to the query context
             query = InsertRuntimeParameters(query);
 
-            var queryExecutorExpression = Expression.Lambda<Func<QueryContext, TResult>>(
-                query,
-                QueryContextParameter);
-
-            try
-            {
-                return queryExecutorExpression.Compile();
-            }
-            finally
-            {
-                Logger.QueryExecutionPlanned(_expressionPrinter, queryExecutorExpression);
-            }
+            return Expression.Lambda<Func<QueryContext, TResult>>(query, QueryContextParameter);
         }
 
         /// <summary>

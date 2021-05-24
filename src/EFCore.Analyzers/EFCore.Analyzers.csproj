@@ -17,6 +17,7 @@
     <!-- NB: Version affects the minimum required Visual Studio version -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisVersion)" PrivateAssets="all" />
     <PackageReference Update="NETStandard.Library" PrivateAssets="all" />
+    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" PrivateAssets="all" />
   </ItemGroup>
 
   <Target Name="SetPackageProperties" BeforeTargets="InitializeStandardNuspecProperties" DependsOnTargets="Build">

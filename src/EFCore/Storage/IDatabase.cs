@@ -58,5 +58,14 @@ namespace Microsoft.EntityFrameworkCore.Storage
         /// <param name="async"> A value indicating whether this is an async query. </param>
         /// <returns> A <see cref="Func{QueryContext, TResult}" /> which can be invoked to get results of the query. </returns>
         Func<QueryContext, TResult> CompileQuery<TResult>(Expression query, bool async);
+
+        /// <summary>
+        ///     Compiles the given query to generate a <see cref="Func{QueryContext, TResult}" />.
+        /// </summary>
+        /// <typeparam name="TResult"> The type of query result. </typeparam>
+        /// <param name="query"> The query to compile. </param>
+        /// <param name="async"> A value indicating whether this is an async query. </param>
+        /// <returns> A <see cref="Func{QueryContext, TResult}" /> which can be invoked to get results of the query. </returns>
+        Expression<Func<QueryContext, TResult>> CompileQueryExpression<TResult>(Expression query, bool async);
     }
 }
